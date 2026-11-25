@@ -10,11 +10,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.FileInputStream;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import java.util.Arrays;
+
 
 public class DescrabblerDB {
     
@@ -26,7 +31,8 @@ public class DescrabblerDB {
     public static void main(String[] args) {
     String wordsPath = 
             "src/main/java/com/mycompany/mavenproject3/descrabblerWordList.txt";
-
+    Path wordList = Path.of
+        ("src/main/java/com/mycompany/mavenproject3/descrabblerWordList.txt");
         Scanner input = new Scanner(System.in);
         //input page
         String main = "";
@@ -36,6 +42,7 @@ public class DescrabblerDB {
         System.out.println("! for input");
         System.out.println("@ to login");
         System.out.println("* for options");
+        System.out.println("+ to append");
         System.out.println("- to exit");
         
         main = input.next();
@@ -61,6 +68,7 @@ public class DescrabblerDB {
         for (String word : validWords) {
             System.out.println(word + " - " + getValue(word) + " points");
         }
+        
         // end input
         }
         if ("*".equals(main)) {
@@ -120,6 +128,28 @@ public class DescrabblerDB {
                 }
         }
         //end options
+        if("+".equals(main)) {
+            System.out.println("Enter a new word for the accepted words list:");
+            String newWordEntry = input.next();
+            try {
+            String listContents = Files.readString(wordList); 
+
+            String[] existingWords = listContents.split("\\s+");
+            if (Arrays.asList(existingWords).contains(newWordEntry)) {
+                System.out.println("Word already exists in list!");
+            }
+            else{try {String wordUpdate = "\n" + newWordEntry; 
+
+    Files.writeString(Path.of(wordsPath), wordUpdate, 
+            StandardOpenOption.APPEND);
+            System.out.println(wordUpdate + " has been added to the list");
+    }
+    catch (IOException e) {
+    System.err.println("Could not update list"); } } }
+          catch (IOException e){
+                System.out.println("Could not verify input");
+            } 
+        }
         }
     }
     
@@ -145,15 +175,9 @@ public class DescrabblerDB {
         
     }
     
-    String wordUpdate = "input placeholder \n";
     
     //word list update demo
-    /* try {
-    Files.writeString(wordsPath, wordUpdate, StandardOpenOption.APPEND);
-            System.out.println(wordUpdate + " has been added to the list");
-    }
-    catch (IOException e) {
-    System.err.println("Could not update list"); } */
+   
     
     private static List<String> getWords(String wordsPath, 
     String enteredLetters) {
